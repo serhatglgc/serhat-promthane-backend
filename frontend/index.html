@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PromptHane - En İyi AI Promptları Keşfet ve Paylaş</title>
+    <meta name="description" content="Gemini, ChatGPT, Claude ve Midjourney için en iyi promptları keşfedin. Kendi promptlarınızı paylaşın, beğenin ve kaydedin.">
+    <meta name="keywords" content="prompt, yapay zeka, chatgpt promptları, midjourney promptları, gemini promptları, prompt paylaşımı">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="PromptHane - AI Prompt Dünyası">
+    <meta property="og:description" content="Yaratıcı promptlar keșfet ve paylaș!">
+    <meta property="og:image" content="https://prompthane.com/og-image.jpg">
+    <meta property="og:type" content="website">
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <header>
+        <div class="nav-container">
+            <div style="display: flex; align-items: center; gap: 2.5rem;">
+                <a href="index.html" class="logo"><i class="fa-solid fa-bolt"></i> <span>PromptHane</span></a>
+                <nav class="main-nav" style="display: flex; gap: 1.5rem;">
+                    <a href="pages/templates.html" style="color: var(--text-secondary); text-decoration: none; font-weight: 500;">Şablonlar</a>
+                    <a href="pages/leaderboard.html" style="color: var(--text-secondary); text-decoration: none; font-weight: 500;">Liderlik Tablosu</a>
+                </nav>
+            </div>
+            <div class="search-bar">
+                <i class="fa-solid fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Prompt veya açıklama ara...">
+            </div>
+            <div class="auth-links" id="authLinks">
+                <!-- JS will populate this -->
+            </div>
+        </div>
+    </header>
+
+    <section class="hero">
+        <h1>Sıradışı AI Promptlar Keşfet</h1>
+        <p>Yaratıcılığını serbest bırak. Gemini, ChatGPT, Claude ve görsel üretim araçları için en
+            iyi promptları tek adreste keşfet, paylaş ve kaydet.</p>
+        <div style="display: flex; gap: 1rem; justify-content: center;">
+            <a href="pages/create-prompt.html" class="btn btn-primary" style="padding: 1rem 2rem; font-size: 1.1rem;">
+                <i class="fa-solid fa-plus"></i> Hemen Paylaş
+            </a>
+        </div>
+    </section>
+
+    <div class="main-container">
+        <aside class="sidebar">
+            <div class="categories">
+                <h3>Kategoriler</h3>
+                <ul id="categoryList">
+                    <li><a href="#" class="active" data-name="">Tümü</a></li>
+                    <!-- JS will populate categories -->
+                </ul>
+            </div>
+        </aside>
+
+        <main class="feed">
+            <div class="feed-header">
+                <h2>Son Eklenen Promptlar</h2>
+            </div>
+            <div class="prompt-grid" id="promptGrid">
+                <!-- JS will populate prompts -->
+                <p>Yükleniyor...</p>
+            </div>
+        </main>
+    </div>
+
+    <footer>
+        <div class="footer-container">
+            <div class="footer-info">
+                <a href="index.html" class="logo"><i class="fa-solid fa-bolt"></i> <span>PromptHane</span></a>
+                <p>En iyi AI promptlarını keşfetmeniz ve paylaşmanız için tasarlandı.</p>
+            </div>
+            <div class="footer-links">
+                <div class="link-group">
+                    <h4>Hızlı Menü</h4>
+                    <ul>
+                        <li><a href="index.html">Ana Sayfa</a></li>
+                        <li><a href="pages/create-prompt.html">Prompt Paylaş</a></li>
+                        <li><a href="pages/contact.html">İletişim</a></li>
+                    </ul>
+                </div>
+                <div class="link-group">
+                    <h4>Yasal</h4>
+                    <ul>
+                        <li><a href="pages/privacy.html">Gizlilik Politikası</a></li>
+                        <li><a href="pages/terms.html">Kullanım Şartları</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            &copy; 2026 PromptHane. Tüm hakları saklıdır.
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+
+</html>

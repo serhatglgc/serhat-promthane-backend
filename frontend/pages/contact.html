@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İletişim - PromptHane</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="nav-container">
+            <a href="../index.html" class="logo"><i class="fa-solid fa-bolt"></i> <span>PromptHane</span></a>
+            <div class="auth-links" id="authLinks"></div>
+        </div>
+    </header>
+
+    <div class="main-container" style="display:block; max-width: 800px; margin: 4rem auto;">
+        <div class="detail-container" style="padding: 3rem;">
+            <h1 style="margin-bottom: 2rem;">İletişim</h1>
+            <p style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 2rem;">
+                Sorularınız, önerileriniz veya iş birlikleri için bizimle iletişime geçebilirsiniz.
+            </p>
+            
+            <div class="auth-container" style="box-shadow: none; padding: 0; max-width: 100%; border:none; background:none;">
+                <form id="contactForm">
+                    <div class="form-group">
+                        <label for="name">Adınız</label>
+                        <input type="text" id="name" required placeholder="Adınız Soyadınız">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">E-posta Adresiniz</label>
+                        <input type="email" id="email" required placeholder="e-posta@örnek.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Mesajınız</label>
+                        <textarea id="message" rows="5" required placeholder="Mesajınızı buraya yazın..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">Gönder</button>
+                    <div id="statusMsg" style="margin-top: 1rem; text-align: center;"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/main.js"></script>
+    <script>
+        updateAuthUI();
+        document.getElementById('contactForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            const status = document.getElementById('statusMsg');
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const message = document.getElementById('message').value;
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Gönderiliyor...';
+            status.innerHTML = '';
+
+            try {
+                const res = await fetch(`${API_URL}/contact`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, message })
+                });
+
+                if(res.ok) {
+                    status.innerHTML = '<span style="color: var(--success)"><i class="fa-solid fa-check"></i> Mesajınız bize ulaştı, teşekkürler!</span>';
+                    e.target.reset();
+                } else {
+                    const data = await res.json();
+                    status.innerHTML = `<span style="color: var(--danger)"><i class="fa-solid fa-triangle-exclamation"></i> ${data.message || 'Hata oluştu'}</span>`;
+                }
+            } catch(err) {
+                status.innerHTML = '<span style="color: var(--danger)">Sunucu bağlantı hatası.</span>';
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Gönder';
+            }
+        });
+    </script>
+</body>
+</html>

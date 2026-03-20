@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt Detayı - PromptHane</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <header>
+        <div class="nav-container">
+            <a href="../index.html" class="logo"><i class="fa-solid fa-bolt"></i> <span>PromptHane</span></a>
+            <div class="auth-links" id="authLinks"></div>
+        </div>
+    </header>
+
+    <div class="main-container" style="display:block;">
+        <div class="detail-container">
+            <div class="detail-header">
+                <div>
+                    <span class="prompt-category" id="dCategory">Yükleniyor...</span>
+                </div>
+                <h1 class="detail-title" id="dTitle">Yükleniyor...</h1>
+                <div class="prompt-footer" style="border:none; padding:0;">
+                    <div class="prompt-author">
+                        <i class="fa-solid fa-user-circle"></i> <span id="dAuthor"></span>
+                    </div>
+                    <div class="prompt-date" id="dDate"></div>
+                </div>
+            </div>
+
+            <div class="detail-body">
+                <p class="prompt-description" id="dDesc"
+                    style="font-size: 1.25rem; line-height:1.7; color: var(--text-primary); margin-bottom: 2.5rem; font-weight: 300;">
+                </p>
+
+                <h3
+                    style="margin-bottom: 1rem; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-secondary);">
+                    Prompt Metni</h3>
+                <div class="prompt-copy-box" style="margin-bottom: 3rem;">
+                    <button class="copy-btn" onclick="copyPrompt()"><i class="fa-regular fa-copy"></i> Kopyala</button>
+                    <div id="dPromptText" style="font-size: 1.05rem;"></div>
+                </div>
+
+                <div id="imageGallery"
+                    style="margin-top: 2rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+                    <!-- Images will be injected here -->
+                </div>
+            </div>
+
+            <div class="detail-footer"
+                style="margin-top: 2rem; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border); padding-top: 2rem;">
+                <div style="display: flex; gap: 1.5rem;">
+                    <button class="action-btn" id="likeBtn" onclick="handleLike()">
+                        <i class="fa-regular fa-heart"></i> <span id="dLikes">0</span>
+                    </button>
+                    <button class="action-btn" id="saveBtn" onclick="handleSave()">
+                        <i class="fa-regular fa-bookmark"></i>
+                    </button>
+                </div>
+
+                <div id="authorActions" class="hidden">
+                    <button class="btn btn-ghost" style="color: var(--danger)" onclick="deletePrompt()"><i
+                            class="fa-solid fa-trash"></i> Sil</button>
+                </div>
+            </div>
+
+            <!-- Comments Section -->
+            <div class="comments-section">
+                <h3>Yorumlar</h3>
+                <div id="commentFormContainer" class="hidden" style="margin-top: 1rem;">
+                    <div class="comment-input-box">
+                        <input type="text" id="commentInput" placeholder="Yorum ekle...">
+                        <button class="btn btn-primary" onclick="submitComment()">Paylaş</button>
+                    </div>
+                </div>
+                <div id="commentsList">
+                    <p style="color: var(--text-secondary);">Yorumlar yükleniyor...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/main.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const promptId = urlParams.get('id');
+        let currentPromptId = promptId;
+
+        if (!promptId) {
+            window.location.href = '../index.html';
+        }
+
+        async function loadPromptDetails() {
+            try {
+                const res = await fetch(`${API_URL}/prompts/${promptId}`);
+                if (!res.ok) throw new Error('Bulunamadı');
+                const p = await res.json();
+
+                document.getElementById('dTitle').textContent = p.title;
+                document.getElementById('dCategory').textContent = p.category_name;
+                document.getElementById('dAuthor').textContent = p.author_name;
+                document.getElementById('dDate').textContent = new Date(p.created_at).toLocaleDateString('tr-TR');
+                document.getElementById('dDesc').textContent = p.description || '';
+                document.getElementById('dPromptText').textContent = p.prompt_text;
+                document.getElementById('dLikes').textContent = p.likes_count || 0;
+                document.title = `${p.title} - PromptHane`;
+
+                const gallery = document.getElementById('imageGallery');
+                if (p.images && p.images.length > 0) {
+                    if (p.images[0] !== null) {
+                        p.images.forEach(img => {
+                            if (img) {
+                                const imgEl = document.createElement('img');
+                                imgEl.src = `/${img}`;
+                                imgEl.style = "max-width: 100%; height: auto; border-radius: 8px; border: 1px solid var(--border);";
+                                gallery.appendChild(imgEl);
+                            }
+                        });
+                    }
+                }
+
+                const user = getUser();
+                if (user) {
+                    document.getElementById('commentFormContainer').classList.remove('hidden');
+                    checkInteractions();
+                    if (user.id === p.author_id) {
+                        document.getElementById('authorActions').classList.remove('hidden');
+                    }
+                }
+                loadComments();
+            } catch (err) {
+                console.error(err);
+                document.querySelector('.detail-container').innerHTML = '<h2>Prompt bulunamadı.</h2>';
+            }
+        }
+
+        async function checkInteractions() {
+            try {
+                const res = await fetch(`${API_URL}/interactions/${promptId}`, {
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                });
+                const data = await res.json();
+
+                if (data.liked) {
+                    const btn = document.getElementById('likeBtn');
+                    btn.classList.add('liked');
+                    btn.querySelector('i').classList.replace('fa-regular', 'fa-solid');
+                }
+                if (data.saved) {
+                    const btn = document.getElementById('saveBtn');
+                    btn.classList.add('saved');
+                    btn.querySelector('i').classList.replace('fa-regular', 'fa-solid');
+                }
+            } catch (e) { }
+        }
+
+        async function handleLike() {
+            if (!getToken()) return window.location.href = 'login.html';
+            await window.likePrompt(promptId, document.getElementById('likeBtn'));
+            // Sync count
+            const res = await fetch(`${API_URL}/prompts/${promptId}`);
+            const p = await res.json();
+            document.getElementById('dLikes').textContent = p.likes_count;
+        }
+
+        async function handleSave() {
+            if (!getToken()) return window.location.href = 'login.html';
+            await window.savePrompt(promptId, document.getElementById('saveBtn'));
+        }
+
+        async function loadComments() {
+            const list = document.getElementById('commentsList');
+            try {
+                const res = await fetch(`${API_URL}/comments/${promptId}`);
+                const comments = await res.json();
+
+                if (comments.length === 0) {
+                    list.innerHTML = '<p style="color: var(--text-secondary);">Henüz yorum yok. İlk yorumu sen yap!</p>';
+                    return;
+                }
+
+                list.innerHTML = '';
+                comments.forEach(c => {
+                    const comment = document.createElement('div');
+                    comment.className = 'comment-item';
+                    
+                    const escapedAuthor = escapeHTML(c.author_name);
+                    const escapedText = escapeHTML(c.comment_text);
+                    const date = new Date(c.created_at).toLocaleDateString('tr-TR');
+
+                    comment.innerHTML = `
+                        <div class="comment-header">
+                            <strong>${escapedAuthor}</strong>
+                            <span>${date}</span>
+                        </div>
+                        <div class="comment-text">${escapedText}</div>
+                    `;
+                    list.appendChild(comment);
+                });
+            } catch (e) {
+                list.innerHTML = '<p class="error-message">Yorumlar yüklenemedi.</p>';
+            }
+        }
+
+        async function submitComment() {
+            const input = document.getElementById('commentInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            try {
+                const res = await fetch(`${API_URL}/comments`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getToken()}`
+                    },
+                    body: JSON.stringify({ prompt_id: promptId, comment_text: text })
+                });
+
+                if (res.ok) {
+                    input.value = '';
+                    loadComments();
+                }
+            } catch (e) {
+                alert('Yorum gönderilirken hata oluştu.');
+            }
+        }
+
+        function copyPrompt() {
+            const text = document.getElementById('dPromptText').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Kopyalandı';
+                setTimeout(() => btn.innerHTML = originalHTML, 2000);
+            });
+        }
+
+
+
+        async function deletePrompt() {
+            if (!confirm('Bu promptu silmek istediğinize emin misiniz?')) return;
+
+            try {
+                const res = await fetch(`${API_URL}/prompts/${promptId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                });
+
+                if (res.ok) {
+                    window.location.href = '../index.html';
+                } else {
+                    const data = await res.json();
+                    alert(data.message);
+                }
+            } catch (err) {
+                alert('Silinirken hata oluştu.');
+            }
+        }
+
+        loadPromptDetails();
+        updateAuthUI();
+    </script>
+</body>
+
+</html>

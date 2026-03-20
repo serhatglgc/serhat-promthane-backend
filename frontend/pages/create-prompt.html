@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yeni Prompt Paylaş - PromptHane</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <header>
+        <div class="nav-container">
+            <a href="../index.html" class="logo"><i class="fa-solid fa-bolt"></i> <span>PromptHane</span></a>
+            <div class="auth-links" id="authLinks"></div>
+        </div>
+    </header>
+
+    <div class="main-container" style="display:block;">
+        <div class="detail-container">
+            <h2 class="detail-title" style="text-align: center; margin-bottom: 2.5rem; letter-spacing: -0.01em;">Yeni
+                Prompt Paylaş</h2>
+            <form id="createPromptForm">
+                <div class="form-group">
+                    <label for="title">Başlık</label>
+                    <input type="text" id="title" required placeholder="Prompt'unuz için kısa ve açık bir başlık...">
+                </div>
+                <div class="form-group">
+                    <label for="category">Kategori</label>
+                    <select id="category" required style="cursor: pointer;">
+                        <option value="">Seçiniz...</option>
+                        <!-- Loaded via JS -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="description">Açıklama</label>
+                    <textarea id="description" rows="3"
+                        placeholder="Bu prompt ne işe yarar? Nasıl kullanılmalı?"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="prompt_text">Prompt İçeriği</label>
+                    <textarea id="prompt_text" rows="6" required style="font-family: monospace;"
+                        placeholder="Kopyalanacak asıl prompt metni buraya..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="images">Görseller <span style="font-weight: 300; font-size: 0.8rem;">(Opsiyonel, Maks
+                            3)</span></label>
+                    <div style="border: 2px dashed var(--border); padding: 1.5rem; border-radius: 12px; text-align: center; background: rgba(0,0,0,0.1); position: relative; transition: all 0.3s ease;"
+                        onmouseover="this.style.borderColor='var(--primary)'"
+                        onmouseout="this.style.borderColor='var(--border)'">
+                        <i class="fa-solid fa-cloud-arrow-up"
+                            style="font-size: 2rem; color: var(--text-secondary); margin-bottom: 1rem; display: block;"></i>
+                        <input type="file" id="images" name="images" accept="image/*" multiple
+                            style="position: absolute; inset: 0; opacity: 0; cursor: pointer;">
+                        <span style="color: var(--text-secondary); font-size: 0.9rem;">Resimleri buraya sürükleyin veya
+                            tıklayın</span>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary"
+                    style="width: 100%; justify-content:center; padding:1.2rem; font-size:1.1rem; margin-top: 1rem;">Hemen
+                    Paylaş</button>
+                <div id="errorMsg" class="error-message"></div>
+            </form>
+        </div>
+    </div>
+
+    <script src="../js/main.js"></script>
+    <script>
+        // Check if user is logged in
+        if (!getToken()) {
+            window.location.href = 'login.html';
+        }
+
+        // Load Categories
+        async function loadSelectCategories() {
+            try {
+                const res = await fetch(`${API_URL}/categories`);
+                const categories = await res.json();
+                const select = document.getElementById('category');
+                categories.forEach(cat => {
+                    select.innerHTML += `<option value="${cat.id}">${cat.name}</option>`;
+                });
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        loadSelectCategories();
+
+        document.getElementById('createPromptForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const title = document.getElementById('title').value;
+            const category_id = document.getElementById('category').value;
+            const description = document.getElementById('description').value;
+            const prompt_text = document.getElementById('prompt_text').value;
+            const imageInput = document.getElementById('images');
+            const errorMsg = document.getElementById('errorMsg');
+
+            if (imageInput.files.length > 3) {
+                errorMsg.textContent = 'En fazla 3 adet resim yükleyebilirsiniz.';
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('title', title);
+            formData.append('category_id', category_id);
+            formData.append('description', description);
+            formData.append('prompt_text', prompt_text);
+
+            for (let i = 0; i < imageInput.files.length; i++) {
+                formData.append('images', imageInput.files[i]);
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/prompts`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${getToken()}`
+                    },
+                    body: formData
+                });
+
+                const data = await res.json();
+                if (res.ok) {
+                    window.location.href = `prompt-detail.html?id=${data.id}`;
+                } else {
+                    errorMsg.textContent = data.message;
+                }
+            } catch (err) {
+                errorMsg.textContent = 'Bir hata oluştu.';
+            }
+        });
+    </script>
+</body>
+
+</html>

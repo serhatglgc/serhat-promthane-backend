@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-posta Doğrula - PromptHane</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="nav-container">
+            <a href="../index.html" class="logo"><i class="fa-solid fa-bolt"></i> <span>PromptHane</span></a>
+        </div>
+    </header>
+
+    <div class="auth-container">
+        <h2>E-posta Doğrulama</h2>
+        <p style="text-align: center; color: var(--text-secondary); margin-bottom: 2rem;">E-posta adresinize gönderilen 6 haneli kodu girin.</p>
+        
+        <form id="verifyForm">
+            <div class="form-group">
+                <label for="email">E-posta</label>
+                <input type="email" id="email" required readonly>
+            </div>
+            <div class="form-group">
+                <label for="code">Doğrulama Kodu</label>
+                <input type="text" id="code" required maxlength="6" pattern="\d{6}" placeholder="123456" style="text-align: center; font-size: 1.5rem; letter-spacing: 5px;">
+            </div>
+            <button type="submit" class="btn btn-primary">Doğrula</button>
+            <div id="errorMsg" class="error-message"></div>
+        </form>
+    </div>
+
+    <script src="../js/main.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const emailParam = urlParams.get('email');
+        if (emailParam) {
+            document.getElementById('email').value = emailParam;
+        }
+
+        document.getElementById('verifyForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const code = document.getElementById('code').value;
+            const errorMsg = document.getElementById('errorMsg');
+
+            try {
+                const res = await fetch(`${API_URL}/auth/verify-email`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, code })
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    alert('E-posta başarıyla doğrulandı! Giriş yapabilirsiniz.');
+                    window.location.href = 'login.html';
+                } else {
+                    errorMsg.textContent = data.message;
+                }
+            } catch (error) {
+                errorMsg.textContent = 'Bir hata oluştu.';
+            }
+        });
+    </script>
+</body>
+</html>

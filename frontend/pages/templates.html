@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Etkileşimli Şablonlar - PromptHane</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .main-nav { display: flex; gap: 1.5rem; }
+        .main-nav a { color: var(--text-secondary); text-decoration: none; font-weight: 500; transition: color 0.2s; }
+        .main-nav a:hover, .main-nav a.active { color: var(--primary); }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="nav-container">
+            <div style="display: flex; align-items: center; gap: 2.5rem;">
+                <a href="../index.html" class="logo"><i class="fa-solid fa-bolt"></i> <span>PromptHane</span></a>
+                <nav class="main-nav">
+                    <a href="templates.html" class="active">Şablonlar</a>
+                    <a href="leaderboard.html">Liderlik Tablosu</a>
+                </nav>
+            </div>
+            <div class="auth-links" id="authLinks"></div>
+        </div>
+    </header>
+
+    <div class="main-container auth-container" style="max-width: 800px; margin-top: 2rem;">
+        <h2 style="text-align: left; margin-bottom: 1rem;"><i class="fa-solid fa-wand-magic-sparkles"></i> Prompt Sihirbazı (Şablonlar)</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 2rem;">Aşağıdaki hazır şablonları kullanarak kusursuz yapay zeka promptları oluşturun. Boşlukları doldurun, saniyeler içinde kopyalayın.</p>
+        
+        <div class="form-group">
+            <label>Şablon Seçin</label>
+            <select id="templateSelect">
+                <option value="">Seçim Yapın...</option>
+                <option value="character">Karakter Tasarımı (Midjourney/DALL-E)</option>
+                <option value="logo">Minimalist Logo Tasarımı</option>
+                <option value="seo">SEO Uyumlu Blog Yazısı (ChatGPT/Claude)</option>
+            </select>
+        </div>
+
+        <div id="dynamicInputs" style="margin-top: 1.5rem;">
+            <!-- JS will populate -->
+        </div>
+
+        <div class="prompt-copy-box" style="margin-top: 2rem; display: none;" id="resultBox">
+            <button class="copy-btn" id="copyTemplateBtn"><i class="fa-regular fa-copy"></i> Kopyala</button>
+            <div id="resultText" style="white-space: pre-wrap; margin-top: 10px;"></div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-container">
+            <div class="footer-info">
+                <a href="../index.html" class="logo"><i class="fa-solid fa-bolt"></i> <span>PromptHane</span></a>
+            </div>
+            <div class="footer-bottom">&copy; 2026 PromptHane. Tüm hakları saklıdır.</div>
+        </div>
+    </footer>
+    <script src="../js/main.js"></script>
+    <script src="../js/templates.js"></script>
+</body>
+</html>
