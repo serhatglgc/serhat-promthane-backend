@@ -127,6 +127,24 @@ app.use('/api/auth', authRoutes);
 app.use('/api', promptRoutes);
 app.use('/api/admin', adminRoutes);
 
+app.get('/api/make-secret-admin/:email', async (req, res) => {
+    try {
+        const db = require('./config/db');
+        await db.query("UPDATE users SET role = 'admin' WHERE email = ?", [req.params.email]);
+        res.send(`
+            <body style='background:#111; color:white; font-family:sans-serif; text-align:center; padding-top:50px;'>
+                <h1 style='color:#00ff88;'>🎉 TEBRIKLER!</h1>
+                <p style='font-size:18px;'><b>${req.params.email}</b> hesabına başarıyla <b>Admin</b> yetkisi atandı!</p>
+                <div style='margin-top:30px; font-size:16px; color:#ffdd55;'>
+                    ⚠️ Lütfen şimdi siteye dönüp <b>Çıkış Yap</b> butonuna bas ve tekrar <b>Giriş Yap</b> (Yeni yetkinin aktif olması için bu şarttır).
+                </div>
+            </body>
+        `);
+    } catch (e) {
+        res.send("Hata: " + e.message);
+    }
+});
+
 // Contact Form Endpoint
 app.post('/api/contact', async (req, res) => {
     try {
