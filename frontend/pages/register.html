@@ -56,7 +56,7 @@
 
                 const data = await res.json();
                 if (res.ok) {
-                    localStorage.setItem('user', JSON.stringify({ id: data.id, username: data.username, email: data.email, role: data.role }));
+                    // Kullanıcı tam olarak e-postasını doğrulamadan localStorage'a 'user' kaydetmiyoruz (Görsel bug'ı engellemek için)
                     alert('Kayıt başarılı! Lütfen e-postanıza gönderilen kodu doğrulayın.');
                     window.location.href = `verify-email.html?email=${email}`;
                 } else {
