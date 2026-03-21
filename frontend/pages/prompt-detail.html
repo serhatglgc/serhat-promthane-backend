@@ -84,14 +84,19 @@
         </div>
     </div>
 
-    <script src="../js/main.js"></script>
+    <script src="../js/main.js?v=2"></script>
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        const promptId = urlParams.get('id');
+        let promptId = urlParams.get('id');
+        
+        if (!promptId && window.location.pathname.includes('/p/')) {
+            promptId = window.location.pathname.split('/').pop();
+        }
+
         let currentPromptId = promptId;
 
         if (!promptId) {
-            window.location.href = '../index.html';
+            window.location.href = '/index.html';
         }
 
         async function loadPromptDetails() {
