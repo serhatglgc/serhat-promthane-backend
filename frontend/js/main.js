@@ -13,7 +13,18 @@ function escapeHTML(str) {
 
 // Auth state
 function getToken() {
-    return localStorage.getItem('token');
+    const token = localStorage.getItem('token');
+    if (token) {
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            if (payload.exp * 1000 < Date.now()) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                return null;
+            }
+        } catch(e) {}
+    }
+    return token;
 }
 
 function getUser() {
@@ -144,7 +155,10 @@ async function loadPrompts(append = false) {
                         <button class="action-btn ${p.is_saved ? 'saved' : ''}" style="margin-left:auto;" onclick="savePrompt(${p.id}, this)">
                             <i class="${p.is_saved ? 'fa-solid' : 'fa-regular'} fa-bookmark"></i>
                         </button>
-                        ${getUser() && getUser().role === 'admin' ? `<button class="action-btn" style="color:var(--danger); margin-left:0.5rem;" onclick="deletePromptByAdmin(${p.id}, this)" title="Sil"><i class="fa-solid fa-trash"></i></button>` : ''}
+                        ${getUser() && Number(getUser().id) === Number(p.author_id) ? `
+                            <button class="action-btn" style="color:var(--primary); margin-left:0.5rem;" onclick="window.location.href='${window.location.pathname.includes('/pages/') ? '' : 'pages/'}edit-prompt.html?id=${p.id}'" title="Düzenle"><i class="fa-solid fa-pen"></i></button>
+                            <button class="action-btn" style="color:var(--danger); margin-left:0.5rem;" onclick="deletePromptByUser(${p.id}, this)" title="Sil"><i class="fa-solid fa-trash"></i></button>
+                        ` : (getUser() && getUser().role === 'admin' ? `<button class="action-btn" style="color:var(--danger); margin-left:0.5rem;" onclick="deletePromptByAdmin(${p.id}, this)" title="Sil"><i class="fa-solid fa-trash"></i></button>` : '')}
                     </div>
                 </div>
             `;
@@ -302,6 +316,36 @@ window.deletePromptByAdmin = async function(id, btn) {
             btn.closest('.prompt-card').remove();
         } else {
             alert("Silme işlemi başarısız. Yetkiniz reddedildi.");
+            btn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+            btn.disabled = false;
+        }
+    } catch(err) {
+        console.error(err);
+        alert("Bağlantı hatası.");
+        btn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+        btn.disabled = false;
+    }
+}
+
+window.deletePromptByUser = async function(id, btn) {
+    if(!confirm("Kendi promptunuzu silmek istediğinize emin misiniz?")) return;
+    
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+
+    try {
+        const res = await fetch(`${API_URL}/prompts/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${getToken()}`
+            }
+        });
+        
+        if(res.ok) {
+            btn.closest('.prompt-card').remove();
+        } else {
+            const data = await res.json();
+            alert("Silme başarısız: " + (data.message || "Bilinmeyen hata"));
             btn.innerHTML = '<i class="fa-solid fa-trash"></i>';
             btn.disabled = false;
         }

@@ -169,6 +169,45 @@ const createPrompt = async (req, res) => {
     }
 };
 
+// @desc    Update a prompt
+// @route   PUT /prompts/:id
+const updatePrompt = async (req, res) => {
+    try {
+        const { title, description, prompt_text, category_id } = req.body;
+        const promptId = req.params.id;
+
+        const [prompts] = await db.query('SELECT * FROM prompts WHERE id = ?', [promptId]);
+        if (prompts.length === 0) {
+            return res.status(404).json({ message: 'Prompt bulunamadı.' });
+        }
+
+        const prompt = prompts[0];
+
+        // Ensure user is the author
+        if (prompt.author_id !== req.user.id) {
+            return res.status(403).json({ message: 'Bu işlem için yetkiniz yok.' });
+        }
+
+        const { hasBadWords } = require('../utils/moderationBot');
+        const checkContent = (text) => hasBadWords(String(text || ''));
+
+        if (checkContent(title) || checkContent(description) || checkContent(prompt_text)) {
+            return res.status(400).json({ message: 'İçerikte yasaklı kelimeler (örn: +18, argo, resim vb.) veya uygunsuz formatlar bulunuyor.' });
+        }
+
+        // Handle updating fields
+        await db.query(
+            'UPDATE prompts SET title = ?, description = ?, prompt_text = ?, category_id = ? WHERE id = ?',
+            [title || prompt.title, description || prompt.description, prompt_text || prompt.prompt_text, category_id || prompt.category_id, promptId]
+        );
+
+        res.json({ message: 'Prompt başarıyla güncellendi.' });
+    } catch (error) {
+        console.error('Update Error:', error);
+        res.status(500).json({ message: 'Sunucu hatası.' });
+    }
+};
+
 // @desc    Delete a prompt
 // @route   DELETE /prompts/:id
 const deletePrompt = async (req, res) => {
@@ -388,6 +427,6 @@ const deleteComment = async (req, res) => {
 };
 
 module.exports = {
-    getPrompts, getPromptById, createPrompt, deletePrompt, getCategories,
+    getPrompts, getPromptById, createPrompt, deletePrompt, updatePrompt, getCategories,
     toggleLike, checkInteractions, addComment, getComments, deleteComment, toggleSave, getSavedPrompts, incrementCopy
 };

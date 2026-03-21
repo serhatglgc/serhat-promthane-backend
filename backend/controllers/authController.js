@@ -9,7 +9,7 @@ const generateCode = () => Math.floor(100000 + Math.random() * 900000).toString(
 // Generate JWT
 const generateToken = (id, username, role = 'user') => {
     return jwt.sign({ id, username, role }, process.env.JWT_SECRET || 'prompthane_gizli_anahtar', {
-        expiresIn: '30d',
+        expiresIn: '7d',
     });
 };
 

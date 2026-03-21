@@ -22,6 +22,7 @@ router.get('/comments/:prompt_id', getComments);
 router.delete('/comments/:id', protect, deleteComment);
 router.post('/save', protect, toggleSave);
 router.get('/saved', protect, getSavedPrompts);
+router.put('/prompts/:id', protect, upload.array('images', 3), require('../controllers/promptController').updatePrompt);
 
 router.get('/categories', getCategories);
 
