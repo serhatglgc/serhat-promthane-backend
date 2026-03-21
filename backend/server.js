@@ -87,6 +87,17 @@ app.get('/api/update-db', async (req, res) => {
     }
 });
 
+// Veritabanındaki tüm kullanıcıları sıfırlayan geçici Endpoint
+app.get('/api/admin/dangerously-reset-db', async (req, res) => {
+    try {
+        const db = require('./config/db');
+        const [result] = await db.query('DELETE FROM users');
+        res.send(`<body style="background:#111; color:white; font-family:sans-serif;"><h1 style="color:#00ff88; text-align:center; margin-top:50px;">🎉 TÜM KULLANICILAR ve PROMPTLAR BAŞARIYLA SİLİNDİ!</h1><p style="text-align:center; font-size:18px;">Toplam ${result.affectedRows} kullanıcı (ve onlara ait yorum, beğeni vb. her şey) sistemden kalıcı olarak temizlendi.</p></body>`);
+    } catch (err) {
+        res.status(500).send("Hata olustu: " + err.message);
+    }
+});
+
 // Email Ayarlarını Test Etme Endpointi
 app.get('/api/test-email', async (req, res) => {
     try {
