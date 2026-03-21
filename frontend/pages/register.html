@@ -47,6 +47,12 @@
             const password = document.getElementById('password').value;
             const errorMsg = document.getElementById('errorMsg');
 
+            // Şifre güç kontrolü: En az 6 karakter, en az 1 harf ve 1 rakam içermeli
+            if (password.length < 6 || !/\d/.test(password) || !/[a-zA-Z]/.test(password)) {
+                errorMsg.textContent = 'Şifreniz en az 6 karakter olmalı ve harf + rakam içermelidir!';
+                return;
+            }
+
             try {
                 const res = await fetch(`${API_URL}/auth/register`, {
                     method: 'POST',
