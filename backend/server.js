@@ -46,6 +46,25 @@ app.use('/backend/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Serve frontend static files
 app.use(express.static(path.join(__dirname, '..', 'frontend')));
+// Veritabanı Kurulum Endpointi (Render ücretsiz planda terminal kapalı olduğu için)
+app.get('/api/init-db', async (req, res) => {
+    try {
+        const fs = require('fs');
+        const db = require('./config/db');
+        const schemaPath = path.join(__dirname, '..', 'database', 'schema.sql');
+        let sql = fs.readFileSync(schemaPath, 'utf8');
+        sql = sql.replace(/CREATE DATABASE IF NOT EXISTS prompt_hane;/gi, '');
+        sql = sql.replace(/USE prompt_hane;/gi, '');
+        const queries = sql.split(';').map(q => q.trim()).filter(q => q.length > 0);
+        
+        for (let i = 0; i < queries.length; i++) {
+            try { await db.query(queries[i]); } catch(e) {}
+        }
+        res.send("<body style='background:#111; color:white; font-family:sans-serif;'><h1 style='color:#00ff88; text-align:center; margin-top:50px;'>🎉 Veritabani Tablolari BASARIYLA Olusturuldu!</h1><p style='text-align:center; font-size:18px;'>Artik bu sekmeyi kapatip sitene donus yapabilirsin.</p></body>");
+    } catch (err) {
+        res.status(500).send("Hata olustu: " + err.message);
+    }
+});
 
 // Routes
 const authRoutes = require('./routes/authRoutes');
