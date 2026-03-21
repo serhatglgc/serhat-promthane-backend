@@ -8,7 +8,7 @@ const pool = mysql.createPool({
     password: process.env.DB_PASSWORD || '',
     database: process.env.DB_NAME || 'prompt_hane',
     ssl: {
-        rejectUnauthorized: true // Aiven için burası çok önemli!
+        rejectUnauthorized: false
     },
     waitForConnections: true,
     connectionLimit: 10,
