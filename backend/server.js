@@ -87,6 +87,26 @@ app.get('/api/update-db', async (req, res) => {
     }
 });
 
+// Email Ayarlarını Test Etme Endpointi
+app.get('/api/test-email', async (req, res) => {
+    try {
+        const { sendVerificationEmail } = require('./services/mailService');
+        await sendVerificationEmail(process.env.EMAIL_USER, "123456");
+        res.send(`<body style="background:#111; color:white; font-family:sans-serif; text-align:center; padding-top:50px;">
+            <h1 style="color:#00ff88;">✅ E-POSTA BAŞARILI</h1>
+            <p>Gmail ayarlarınız kusursuz çalışıyor. Kendi adresinize (${process.env.EMAIL_USER}) bir test emaili atıldı.</p>
+        </body>`);
+    } catch (err) {
+        res.send(`<body style="background:#111; color:white; font-family:sans-serif; padding:50px;">
+            <h1 style="color:#ff4444;">❌ E-POSTA HATASI</h1>
+            <p>Gmail sunucusuna giriş başarısız oldu. Yanlış şifre veya e-posta adresi girdiniz.</p>
+            <hr>
+            <h3>Hata Detayları (Google'ın verdiği hata):</h3>
+            <pre style="background:#222; padding:20px; text-align:left; color:orange;">${err.message}</pre>
+        </body>`);
+    }
+});
+
 // Routes
 const authRoutes = require('./routes/authRoutes');
 const promptRoutes = require('./routes/promptRoutes');
