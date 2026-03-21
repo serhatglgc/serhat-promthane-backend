@@ -66,6 +66,27 @@ app.get('/api/init-db', async (req, res) => {
     }
 });
 
+// Veritabanı Eksik Sütunları Onarma Endpointi
+app.get('/api/update-db', async (req, res) => {
+    try {
+        const db = require('./config/db');
+        const alters = [
+            "ALTER TABLE users ADD COLUMN verification_code VARCHAR(10)",
+            "ALTER TABLE users ADD COLUMN is_verified TINYINT(1) DEFAULT 0",
+            "ALTER TABLE users ADD COLUMN reset_code VARCHAR(10)",
+            "ALTER TABLE users ADD COLUMN reset_code_expiry DATETIME",
+            "ALTER TABLE users ADD COLUMN role VARCHAR(20) DEFAULT 'user'",
+            "CREATE TABLE IF NOT EXISTS prompt_copies (id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, prompt_id INT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE, FOREIGN KEY (prompt_id) REFERENCES prompts(id) ON DELETE CASCADE)"
+        ];
+        for (let q of alters) {
+            try { await db.query(q); } catch(e) { console.log(e.message); }
+        }
+        res.send("<body style='background:#111; color:white; font-family:sans-serif;'><h1 style='color:#00ff88; text-align:center; margin-top:50px;'>🎉 Eksik Tablolar ve Sütunlar BAŞARIYLA Eklendi!</h1><p style='text-align:center; font-size:18px;'>Artik bu sekmeyi kapatip sitene donus yapabilirsin.</p></body>");
+    } catch (err) {
+        res.status(500).send("Hata olustu: " + err.message);
+    }
+});
+
 // Routes
 const authRoutes = require('./routes/authRoutes');
 const promptRoutes = require('./routes/promptRoutes');
