@@ -167,31 +167,30 @@ const getLeaderboard = async (req, res) => {
             SELECT u.id, u.username, 
                    COUNT(p.id) as total_prompts,
                    (
-                       SELECT COUNT(*) 
-                       FROM prompt_copies pc 
-                       JOIN prompts p2 ON pc.prompt_id = p2.id 
-                       WHERE p2.author_id = u.id AND pc.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
-                   ) as total_copies
+                       (SELECT COUNT(*) FROM likes l JOIN prompts pl ON l.prompt_id = pl.id WHERE pl.author_id = u.id AND l.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY))
+                       +
+                       (SELECT COUNT(*) FROM saved_prompts sp JOIN prompts ps ON sp.prompt_id = ps.id WHERE ps.author_id = u.id AND sp.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY))
+                   ) as total_score
             FROM users u
             LEFT JOIN prompts p ON u.id = p.author_id
             GROUP BY u.id
             HAVING total_prompts > 0
-            ORDER BY total_copies DESC, total_prompts DESC
+            ORDER BY total_score DESC, total_prompts DESC
             LIMIT 10
         `;
         const [leaderboard] = await db.query(query);
         
         const leaders = leaderboard.map(l => {
             let badge = '';
-            if (l.total_copies >= 100) badge = '👑 Usta Mühendis';
-            else if (l.total_copies >= 50) badge = '⭐ Midjourney Uzmanı';
-            else if (l.total_copies >= 10) badge = '🚀 Yükselen Yıldız';
+            if (l.total_score >= 100) badge = '👑 Usta Mühendis';
+            else if (l.total_score >= 50) badge = '⭐ Midjourney Uzmanı';
+            else if (l.total_score >= 10) badge = '🚀 Yükselen Yıldız';
             else badge = '🌱 Çırak';
             
             return {
                 id: l.id,
                 username: l.username,
-                total_copies: l.total_copies,
+                total_score: l.total_score,
                 total_prompts: l.total_prompts,
                 badge
             };

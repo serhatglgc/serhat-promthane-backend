@@ -94,7 +94,10 @@ async function loadPrompts(append = false) {
         url.searchParams.append('page', currentPage);
         url.searchParams.append('limit', 12);
 
-        const res = await fetch(url);
+        const headers = {};
+        if (getToken()) headers['Authorization'] = `Bearer ${getToken()}`;
+
+        const res = await fetch(url, { headers });
         const data = await res.json();
         const prompts = data.prompts || (Array.isArray(data) ? data : []);
 
@@ -130,16 +133,16 @@ async function loadPrompts(append = false) {
                     
                     <div style="display: flex; gap: 1rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); flex-wrap: wrap;">
                         <button class="action-btn" title="Kopyala" data-text="${encodeURIComponent(p.prompt_text)}" onclick="copyPromptText(${p.id}, this)">
-                            <i class="fa-regular fa-copy"></i> <span class="copy-count">${p.copy_count || 0}</span>
+                            <i class="fa-regular fa-copy"></i> <span>Kopyala</span>
                         </button>
-                        <button class="action-btn" onclick="likePrompt(${p.id}, this)">
-                            <i class="fa-regular fa-heart"></i> <span class="like-count">${p.likes_count || 0}</span>
+                        <button class="action-btn ${p.is_liked ? 'liked' : ''}" onclick="likePrompt(${p.id}, this)">
+                            <i class="${p.is_liked ? 'fa-solid' : 'fa-regular'} fa-heart"></i> <span class="like-count">${p.likes_count || 0}</span>
                         </button>
                         <a href="p/${p.id}" class="action-btn" style="text-decoration:none;">
                             <i class="fa-regular fa-comment"></i> <span>${p.comments_count || 0}</span>
                         </a>
-                        <button class="action-btn" style="margin-left:auto;" onclick="savePrompt(${p.id}, this)">
-                            <i class="fa-regular fa-bookmark"></i>
+                        <button class="action-btn ${p.is_saved ? 'saved' : ''}" style="margin-left:auto;" onclick="savePrompt(${p.id}, this)">
+                            <i class="${p.is_saved ? 'fa-solid' : 'fa-regular'} fa-bookmark"></i>
                         </button>
                         ${getUser() && getUser().role === 'admin' ? `<button class="action-btn" style="color:var(--danger); margin-left:0.5rem;" onclick="deletePromptByAdmin(${p.id}, this)" title="Sil"><i class="fa-solid fa-trash"></i></button>` : ''}
                     </div>

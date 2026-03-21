@@ -4,6 +4,16 @@ const db = require('../config/db');
 // @route   GET /prompts
 const getPrompts = async (req, res) => {
     try {
+        let userId = 0;
+        if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+            try {
+                const token = req.headers.authorization.split(' ')[1];
+                const jwt = require('jsonwebtoken');
+                const decoded = jwt.verify(token, process.env.JWT_SECRET || 'prompthane_gizli_anahtar');
+                userId = decoded.id;
+            } catch (err) {}
+        }
+
         const { category, search } = req.query;
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
@@ -30,6 +40,8 @@ const getPrompts = async (req, res) => {
         let query = `
             SELECT p.id, p.title, p.description, p.prompt_text, p.created_at, p.copy_count, p.author_id,
                    c.name as category_name, u.username as author_name,
+                   (SELECT COUNT(*) FROM likes WHERE prompt_id = p.id AND user_id = ${userId}) > 0 as is_liked,
+                   (SELECT COUNT(*) FROM saved_prompts WHERE prompt_id = p.id AND user_id = ${userId}) > 0 as is_saved,
                    (SELECT COUNT(*) FROM likes WHERE prompt_id = p.id) as likes_count,
                    (SELECT COUNT(*) FROM comments WHERE prompt_id = p.id) as comments_count,
                    (SELECT JSON_ARRAYAGG(image_url) FROM prompt_images pi WHERE pi.prompt_id = p.id) as images
