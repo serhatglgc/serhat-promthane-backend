@@ -127,7 +127,7 @@
                 if (user) {
                     document.getElementById('commentFormContainer').classList.remove('hidden');
                     checkInteractions();
-                    if (user.id === p.author_id) {
+                    if (user.id === p.author_id || user.role === 'admin') {
                         document.getElementById('authorActions').classList.remove('hidden');
                     }
                 }
@@ -184,6 +184,7 @@
                 }
 
                 list.innerHTML = '';
+                const user = getUser();
                 comments.forEach(c => {
                     const comment = document.createElement('div');
                     comment.className = 'comment-item';
@@ -192,12 +193,17 @@
                     const escapedText = escapeHTML(c.comment_text);
                     const date = new Date(c.created_at).toLocaleDateString('tr-TR');
 
+                    let deleteBtn = '';
+                    if (user && (user.id === c.user_id || user.role === 'admin')) {
+                        deleteBtn = `<button class="btn btn-ghost" style="color:var(--danger); padding:0; font-size:0.9rem;" onclick="deleteComment(${c.id})"><i class="fa-solid fa-trash"></i></button>`;
+                    }
+
                     comment.innerHTML = `
-                        <div class="comment-header">
-                            <strong>${escapedAuthor}</strong>
-                            <span>${date}</span>
+                        <div class="comment-header" style="display:flex; justify-content:space-between; align-items:center;">
+                            <div><strong>${escapedAuthor}</strong> <span style="margin-left:8px; color:var(--text-secondary); font-size:0.85em;">${date}</span></div>
+                            ${deleteBtn}
                         </div>
-                        <div class="comment-text">${escapedText}</div>
+                        <div class="comment-text" style="word-break:break-word;">${escapedText}</div>
                     `;
                     list.appendChild(comment);
                 });
@@ -241,6 +247,24 @@
         }
 
 
+
+        async function deleteComment(commentId) {
+            if (!confirm('Bu yorumu silmek istediğinize emin misiniz?')) return;
+            try {
+                const res = await fetch(`${API_URL}/comments/${commentId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                });
+                if (res.ok) {
+                    loadComments();
+                } else {
+                    const data = await res.json();
+                    alert(data.message || 'Yorum silinemedi.');
+                }
+            } catch (err) {
+                alert('Silinirken hata oluştu.');
+            }
+        }
 
         async function deletePrompt() {
             if (!confirm('Bu promptu silmek istediğinize emin misiniz?')) return;

@@ -56,9 +56,9 @@ app.get('/api/init-db', async (req, res) => {
         sql = sql.replace(/CREATE DATABASE IF NOT EXISTS prompt_hane;/gi, '');
         sql = sql.replace(/USE prompt_hane;/gi, '');
         const queries = sql.split(';').map(q => q.trim()).filter(q => q.length > 0);
-        
+
         for (let i = 0; i < queries.length; i++) {
-            try { await db.query(queries[i]); } catch(e) {}
+            try { await db.query(queries[i]); } catch (e) { }
         }
         res.send("<body style='background:#111; color:white; font-family:sans-serif;'><h1 style='color:#00ff88; text-align:center; margin-top:50px;'>🎉 Veritabani Tablolari BASARIYLA Olusturuldu!</h1><p style='text-align:center; font-size:18px;'>Artik bu sekmeyi kapatip sitene donus yapabilirsin.</p></body>");
     } catch (err) {
@@ -79,7 +79,7 @@ app.get('/api/update-db', async (req, res) => {
             "CREATE TABLE IF NOT EXISTS prompt_copies (id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, prompt_id INT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE, FOREIGN KEY (prompt_id) REFERENCES prompts(id) ON DELETE CASCADE)"
         ];
         for (let q of alters) {
-            try { await db.query(q); } catch(e) { console.log(e.message); }
+            try { await db.query(q); } catch (e) { console.log(e.message); }
         }
         res.send("<body style='background:#111; color:white; font-family:sans-serif;'><h1 style='color:#00ff88; text-align:center; margin-top:50px;'>🎉 Eksik Tablolar ve Sütunlar BAŞARIYLA Eklendi!</h1><p style='text-align:center; font-size:18px;'>Artik bu sekmeyi kapatip sitene donus yapabilirsin.</p></body>");
     } catch (err) {
@@ -150,7 +150,7 @@ app.get('/p/:id', async (req, res) => {
         const db = require('./config/db');
         const fs = require('fs');
         const [prompts] = await db.query('SELECT title, description, (SELECT image_url FROM prompt_images pi WHERE pi.prompt_id = p.id LIMIT 1) as image FROM prompts p WHERE p.id = ?', [promptId]);
-        
+
         const htmlPath = path.join(__dirname, '..', 'frontend', 'pages', 'prompt-detail.html');
         let html = fs.readFileSync(htmlPath, 'utf-8');
 
@@ -234,8 +234,8 @@ app.listen(PORT, () => {
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).json({
-        message: process.env.NODE_ENV === 'production' 
-            ? 'Bir sunucu hatası oluştu.' 
+        message: process.env.NODE_ENV === 'production'
+            ? 'Bir sunucu hatası oluştu.'
             : err.message
     });
 });

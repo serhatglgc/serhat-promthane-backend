@@ -169,8 +169,8 @@ const deletePrompt = async (req, res) => {
 
         const prompt = prompts[0];
 
-        // Ensure user is the author
-        if (prompt.author_id !== req.user.id) {
+        // Ensure user is the author or admin
+        if (prompt.author_id !== req.user.id && req.user.role !== 'admin') {
             return res.status(403).json({ message: 'Bu işlem için yetkiniz yok.' });
         }
 
@@ -248,7 +248,7 @@ const addComment = async (req, res) => {
 const getComments = async (req, res) => {
     try {
         const [comments] = await db.query(`
-            SELECT c.id, c.comment_text, c.created_at, u.username as author_name
+            SELECT c.id, c.comment_text, c.created_at, c.user_id, u.username as author_name
             FROM comments c
             JOIN users u ON c.user_id = u.id
             WHERE c.prompt_id = ?
@@ -350,7 +350,32 @@ const incrementCopy = async (req, res) => {
     }
 };
 
+// @desc    Delete a comment
+// @route   DELETE /comments/:id
+const deleteComment = async (req, res) => {
+    try {
+        const [comments] = await db.query('SELECT * FROM comments WHERE id = ?', [req.params.id]);
+
+        if (comments.length === 0) {
+            return res.status(404).json({ message: 'Yorum bulunamadı.' });
+        }
+
+        const comment = comments[0];
+
+        // Ensure user is the author or admin
+        if (comment.user_id !== req.user.id && req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Bu işlem için yetkiniz yok.' });
+        }
+
+        await db.query('DELETE FROM comments WHERE id = ?', [req.params.id]);
+        res.json({ message: 'Yorum silindi.' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Sunucu hatası.' });
+    }
+};
+
 module.exports = {
     getPrompts, getPromptById, createPrompt, deletePrompt, getCategories,
-    toggleLike, checkInteractions, addComment, getComments, toggleSave, getSavedPrompts, incrementCopy
+    toggleLike, checkInteractions, addComment, getComments, deleteComment, toggleSave, getSavedPrompts, incrementCopy
 };

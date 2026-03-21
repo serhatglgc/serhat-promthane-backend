@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const {
     getPrompts, getPromptById, createPrompt, deletePrompt, getCategories,
-    toggleLike, checkInteractions, addComment, getComments, toggleSave, getSavedPrompts, incrementCopy
+    toggleLike, checkInteractions, addComment, getComments, deleteComment, toggleSave, getSavedPrompts, incrementCopy
 } = require('../controllers/promptController');
 const { protect } = require('../middleware/authMiddleware');
 
@@ -19,6 +19,7 @@ router.post('/like', protect, toggleLike);
 router.get('/interactions/:id', protect, checkInteractions);
 router.post('/comments', protect, addComment);
 router.get('/comments/:prompt_id', getComments);
+router.delete('/comments/:id', protect, deleteComment);
 router.post('/save', protect, toggleSave);
 router.get('/saved', protect, getSavedPrompts);
 
