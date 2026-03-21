@@ -745,6 +745,20 @@ footer {
         width: 100%;
         gap: 1rem !important;
     }
+    .sidebar {
+        margin-bottom: 1rem;
+    }
+    .categories ul {
+        display: flex;
+        overflow-x: auto;
+        gap: 0.5rem;
+        padding-bottom: 0.5rem;
+        -webkit-overflow-scrolling: touch;
+    }
+    .categories li a {
+        white-space: nowrap;
+        margin-bottom: 0;
+    }
     .search-bar {
         margin: 0.5rem 0;
         max-width: 100%;
