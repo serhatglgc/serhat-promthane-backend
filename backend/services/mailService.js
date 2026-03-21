@@ -1,17 +1,63 @@
 const nodemailer = require('nodemailer');
 
-const transporter = nodemailer.createTransport({
-    service: 'gmail', // Or your preferred service
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    }
-});
-
 const sendEmail = async (to, subject, html) => {
     try {
+        const fromEmail = process.env.EMAIL_USER || 'noreply@prompthane.com';
+
+        // 1. BREVO HTTP API (Render ücretsiz plandaki SMTP engelini aşar)
+        if (process.env.BREVO_API_KEY) {
+            console.log("Brevo API ile mail gonderiliyor...");
+            const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'api-key': process.env.BREVO_API_KEY
+                },
+                body: JSON.stringify({
+                    sender: { email: fromEmail, name: 'PromptHane' },
+                    to: [{ email: to }],
+                    subject: subject,
+                    htmlContent: html
+                })
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(JSON.stringify(data));
+            return data;
+        }
+
+        // 2. RESEND HTTP API (Aynı şekilde SMTP engelini aşar)
+        if (process.env.RESEND_API_KEY) {
+            console.log("Resend API ile mail gonderiliyor...");
+            const response = await fetch('https://api.resend.com/emails', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    from: `PromptHane <onboarding@resend.dev>`,
+                    to: [to],
+                    subject: subject,
+                    html: html
+                })
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(JSON.stringify(data));
+            return data;
+        }
+
+        // 3. Klasik Gmail SMTP (Sadece port engeli yoksa veya local'de çalışır)
+        console.log("Gmail SMTP ile mail gonderiliyor...");
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS
+            }
+        });
         const info = await transporter.sendMail({
-            from: `"PromptHane" <${process.env.EMAIL_USER}>`,
+            from: `"PromptHane" <${fromEmail}>`,
             to,
             subject,
             html
