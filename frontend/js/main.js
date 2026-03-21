@@ -128,7 +128,7 @@ async function loadPrompts(append = false) {
                     <a href="p/${p.id}" class="prompt-title">${escapedTitle}</a>
                     <p class="prompt-description">${escapedDesc}</p>
                     
-                    <div style="display: flex; gap: 1rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+                    <div style="display: flex; gap: 1rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); flex-wrap: wrap;">
                         <button class="action-btn" title="Kopyala" data-text="${encodeURIComponent(p.prompt_text)}" onclick="copyPromptText(${p.id}, this)">
                             <i class="fa-regular fa-copy"></i> <span class="copy-count">${p.copy_count || 0}</span>
                         </button>
