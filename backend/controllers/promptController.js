@@ -118,9 +118,9 @@ const createPrompt = async (req, res) => {
         };
 
         if (checkContent(title) || checkContent(description) || checkContent(prompt_text)) {
-            // Explicitly delete files if content is banned
+            // Delete uploaded files if content contains HTML tags (XSS prevention)
             deleteUploadedFiles();
-            return res.status(400).json({ message: 'İçerikte yasaklı kelimeler (örn: +18, argo, resim vb.) veya uygunsuz formatlar bulunuyor.' });
+            return res.status(400).json({ message: 'İçerikte HTML etiketleri kullanılamaz.' });
         }
 
         if (!title || !prompt_text || !category_id) {
@@ -192,7 +192,7 @@ const updatePrompt = async (req, res) => {
         const checkContent = (text) => hasBadWords(String(text || ''));
 
         if (checkContent(title) || checkContent(description) || checkContent(prompt_text)) {
-            return res.status(400).json({ message: 'İçerikte yasaklı kelimeler (örn: +18, argo, resim vb.) veya uygunsuz formatlar bulunuyor.' });
+            return res.status(400).json({ message: 'İçerikte HTML etiketleri kullanılamaz.' });
         }
 
         // Handle updating fields
