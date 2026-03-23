@@ -131,6 +131,7 @@ async function loadPrompts(append = false) {
             const escapedAuthor = escapeHTML(p.author_name);
             const escapedCategory = escapeHTML(p.category_name);
 
+            const encodedText = encodeURIComponent(p.prompt_text);
             card.innerHTML = `
                 <div class="prompt-content">
                     <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 0.5rem;">
@@ -141,9 +142,15 @@ async function loadPrompts(append = false) {
                     </div>
                     <a href="p/${p.id}" class="prompt-title">${escapedTitle}</a>
                     <p class="prompt-description">${escapedDesc}</p>
-                    
+
+                    <!-- Prompt text toggle -->
+                    <div class="prompt-text-box" id="ptbox-${p.id}" style="display:none;"></div>
+                    <button class="action-btn show-prompt-btn" id="ptbtn-${p.id}" onclick="togglePromptText(${p.id}, '${encodedText}')" style="width:100%; justify-content:center; margin-top:0.5rem; border:1px solid var(--primary); color:var(--primary); border-radius:8px; padding:0.45rem 0;">
+                        <i class="fa-regular fa-eye"></i> <span>Promptu Göster</span>
+                    </button>
+
                     <div style="display: flex; gap: 1rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); flex-wrap: wrap;">
-                        <button class="action-btn" title="Kopyala" data-text="${encodeURIComponent(p.prompt_text)}" onclick="copyPromptText(${p.id}, this)">
+                        <button class="action-btn" title="Kopyala" data-text="${encodedText}" onclick="copyPromptText(${p.id}, this)">
                             <i class="fa-regular fa-copy"></i> <span>Kopyala</span>
                         </button>
                         <button class="action-btn ${p.is_liked ? 'liked' : ''}" onclick="likePrompt(${p.id}, this)">
@@ -262,6 +269,43 @@ window.savePrompt = async function (promptId, btnElement) {
         }
     } catch (err) {
         console.error(err);
+    }
+};
+
+window.togglePromptText = function (promptId, encodedText) {
+    const box = document.getElementById('ptbox-' + promptId);
+    const btn = document.getElementById('ptbtn-' + promptId);
+    if (!box || !btn) return;
+
+    const isHidden = box.style.display === 'none';
+    if (isHidden) {
+        const text = decodeURIComponent(encodedText);
+        box.textContent = text;
+        box.style.cssText = [
+            'display:block',
+            'background:var(--surface,#1a1a2e)',
+            'border:1px solid var(--border,#2a2a4a)',
+            'border-radius:8px',
+            'padding:0.85rem 1rem',
+            'margin-top:0.5rem',
+            'font-size:0.85rem',
+            'line-height:1.6',
+            'color:var(--text,#e0e0e0)',
+            'white-space:pre-wrap',
+            'word-break:break-word',
+            'max-height:200px',
+            'overflow-y:auto'
+        ].join(';');
+        btn.querySelector('i').className = 'fa-regular fa-eye-slash';
+        btn.querySelector('span').textContent = 'Promptu Gizle';
+        btn.style.color = 'var(--text-muted, #888)';
+        btn.style.borderColor = 'var(--border)';
+    } else {
+        box.style.display = 'none';
+        btn.querySelector('i').className = 'fa-regular fa-eye';
+        btn.querySelector('span').textContent = 'Promptu Göster';
+        btn.style.color = 'var(--primary)';
+        btn.style.borderColor = 'var(--primary)';
     }
 };
 
