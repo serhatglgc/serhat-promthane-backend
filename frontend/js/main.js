@@ -127,7 +127,7 @@ async function loadPrompts(append = false) {
             card.style = 'flex-direction: column; gap: 1rem;';
             
             const escapedTitle = escapeHTML(p.title);
-            const escapedDesc = escapeHTML(p.description);
+            const escapedDesc = escapeHTML((p.description || '').replace(/,([^\s])/g, ', $1'));
             const escapedAuthor = escapeHTML(p.author_name);
             const escapedCategory = escapeHTML(p.category_name);
 
