@@ -127,9 +127,14 @@ async function loadPrompts(append = false) {
             card.style = 'flex-direction: column; gap: 1rem;';
             
             const escapedTitle = escapeHTML(p.title);
-            const escapedDesc = escapeHTML((p.description || '').replace(/,([^\s])/g, ', $1'));
             const escapedAuthor = escapeHTML(p.author_name);
             const escapedCategory = escapeHTML(p.category_name);
+            const rawDesc = p.description || '';
+            const descParts = rawDesc.split(',').map(s => s.trim()).filter(Boolean);
+            const formattedDesc = descParts.length > 1
+                ? descParts.map(s => escapeHTML(s)).join(' • ')
+                : escapeHTML(rawDesc);
+
 
             const encodedText = encodeURIComponent(p.prompt_text);
             card.innerHTML = `
@@ -141,7 +146,7 @@ async function loadPrompts(append = false) {
                         </div>
                     </div>
                     <a href="p/${p.id}" class="prompt-title">${escapedTitle}</a>
-                    <p class="prompt-description">${escapedDesc}</p>
+                    <p class="prompt-description">${formattedDesc}</p>
 
                     <!-- Prompt text toggle -->
                     <div class="prompt-text-box" id="ptbox-${p.id}" style="display:none;"></div>

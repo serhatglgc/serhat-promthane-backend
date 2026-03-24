@@ -109,7 +109,14 @@
                 document.getElementById('dCategory').textContent = p.category_name;
                 document.getElementById('dAuthor').textContent = p.author_name;
                 document.getElementById('dDate').textContent = new Date(p.created_at).toLocaleDateString('tr-TR');
-                document.getElementById('dDesc').textContent = p.description || '';
+                const descEl = document.getElementById('dDesc');
+                const rawDesc = p.description || '';
+                const parts = rawDesc.split(',').map(s => s.trim()).filter(Boolean);
+                if (parts.length > 1) {
+                    descEl.innerHTML = parts.map(s => `• ${escapeHTML(s)}`).join('<br>');
+                } else {
+                    descEl.textContent = rawDesc;
+                }
                 document.getElementById('dPromptText').textContent = p.prompt_text;
                 document.getElementById('dLikes').textContent = p.likes_count || 0;
                 document.title = `${p.title} - PromptHane`;
