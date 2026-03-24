@@ -381,11 +381,6 @@ header {
     color: var(--text-secondary);
     font-size: 0.95rem;
     margin-bottom: 1rem;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
 }
 
 .prompt-footer {
